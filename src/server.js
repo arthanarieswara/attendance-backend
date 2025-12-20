@@ -1,3 +1,5 @@
+require('dotenv').config(); // MUST be at top
+
 const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./routes/auth.routes');
@@ -17,3 +19,4 @@ app.get('/', async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  
