@@ -44,3 +44,24 @@ exports.createClass = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+exports.getClassesByYear = async (req, res) => {
+  try {
+    const { year, department_id } = req.query;
+
+    const result = await pool.query(
+      `
+      SELECT id, year, section
+      FROM classes
+      WHERE year = $1 AND department_id = $2 AND is_active = true
+      ORDER BY section
+      `,
+      [year, department_id]
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
