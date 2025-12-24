@@ -8,7 +8,7 @@ const {
 
 router.get('/students', verifyToken, isAdmin, getStudents);
 router.post('/students', verifyToken, isAdmin, createStudent);
-router.put('/students/:id', verifyToken, isAdmin, updateStudent);
+
 
 
 module.exports = router;
