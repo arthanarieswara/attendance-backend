@@ -36,3 +36,40 @@ exports.createDepartment = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+// UPDATE department
+exports.updateDepartment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, code, is_active } = req.body;
+
+    if (!name || !code) {
+      return res.status(400).json({ message: 'Name and code are required' });
+    }
+
+    const result = await pool.query(
+      `
+      UPDATE departments
+      SET name = $1,
+          code = $2,
+          is_active = COALESCE($3, is_active)
+      WHERE id = $4
+      RETURNING *
+      `,
+      [name, code, is_active, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: 'Department not found' });
+    }
+
+    res.json({
+      message: 'Department updated successfully',
+      department: result.rows[0],
+    });
+  } catch (error) {
+    console.error('Update department error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
