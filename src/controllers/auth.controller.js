@@ -83,3 +83,99 @@ exports.staffLogin = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+exports.staffLogin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const result = await pool.query(
+      `
+      SELECT * FROM staff_users
+      WHERE email = $1
+      AND role IN ('Principal', 'HOD', 'ClassAdviser')
+      `,
+      [email]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    const user = result.rows[0];
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    const token = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        department_id: user.department_id,
+        class_id: user.class_id,
+      },
+    });
+  } catch (error) {
+    console.error('Staff login error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.staffLogin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const result = await pool.query(
+      `
+      SELECT * FROM staff_users
+      WHERE email = $1
+      AND role IN ('Principal', 'HOD', 'ClassAdviser')
+      `,
+      [email]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    const user = result.rows[0];
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    const token = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        department_id: user.department_id,
+        class_id: user.class_id,
+      },
+    });
+  } catch (err) {
+    console.error('Staff login error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
