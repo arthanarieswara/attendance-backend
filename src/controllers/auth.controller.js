@@ -7,7 +7,7 @@ exports.adminLogin = async (req, res) => {
     const { email, password } = req.body;
 
     const result = await pool.query(
-      'SELECT * FROM staff_users WHERE email=$1 AND role IN ($2,$3)',
+      'SELECT * FROM users WHERE email=$1 AND role IN ($2,$3)',
       [email, 'Admin', 'Principal']
     );
 
