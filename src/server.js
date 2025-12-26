@@ -20,6 +20,8 @@ app.use('/api', departmentRoutes);
 app.use('/api', require('./routes/classes.routes'));
 app.use('/api', require('./routes/classAdvisers.routes'));
 app.use('/api', require('./routes/students.routes'));
+app.use('/api', require('./routes/staffUsers.routes'));
+
 
 
 app.get('/', async (req, res) => {
