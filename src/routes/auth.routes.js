@@ -6,7 +6,10 @@ const {
   staffLogin,
 } = require('../controllers/auth.controller');
 
-router.post('/auth/admin/login', adminLogin);
-router.post('/auth/staff/login', staffLogin);
+// ADMIN LOGIN
+router.post('/admin/login', adminLogin);
+
+// STAFF LOGIN (Principal, HOD, ClassAdviser)
+router.post('/staff/login', staffLogin);
 
 module.exports = router;
