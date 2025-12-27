@@ -1,18 +1,12 @@
 const express = require('express');
 const router = express.Router();
 
-const { adminLogin, staffLogin, } = require('../controllers/auth.controller');
-const { verifyToken, isAdmin } = require('../middleware/auth.middleware');
+const {
+  adminLogin,
+  staffLogin,
+} = require('../controllers/auth.controller');
 
-// Public route
-router.post('/admin/login', adminLogin);
-router.post('/staff/login', staffLogin);
-// Protected route (Admin only)
-router.get('/admin/profile', verifyToken, isAdmin, (req, res) => {
-  res.json({
-    message: 'Welcome Admin',
-    admin: req.user
-  });
-});
+router.post('/auth/admin/login', adminLogin);
+router.post('/auth/staff/login', staffLogin);
 
 module.exports = router;

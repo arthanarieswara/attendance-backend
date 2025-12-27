@@ -2,13 +2,20 @@ const pool = require('../config/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+/* ===================== ADMIN LOGIN ===================== */
+/* Admin ONLY (users table) */
+
 exports.adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     const result = await pool.query(
-      'SELECT * FROM users WHERE email=$1 AND role IN ($2,$3)',
-      [email, 'Admin', 'Principal']
+      `
+      SELECT * FROM users
+      WHERE email = $1
+      AND role = 'Admin'
+      `,
+      [email]
     );
 
     if (result.rows.length === 0) {
@@ -16,8 +23,8 @@ exports.adminLogin = async (req, res) => {
     }
 
     const user = result.rows[0];
-    const match = await bcrypt.compare(password, user.password);
 
+    const match = await bcrypt.compare(password, user.password);
     if (!match) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
@@ -33,8 +40,8 @@ exports.adminLogin = async (req, res) => {
       admin: {
         id: user.id,
         name: user.name,
-        role: user.role,
         email: user.email,
+        role: user.role,
       },
     });
   } catch (err) {
@@ -43,13 +50,20 @@ exports.adminLogin = async (req, res) => {
   }
 };
 
+/* ===================== STAFF LOGIN ===================== */
+/* Principal, HOD, ClassAdviser (staff_users table) */
+
 exports.staffLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     const result = await pool.query(
-      'SELECT * FROM staff_users WHERE email=$1 AND role IN ($2,$3)',
-      [email, 'HOD', 'ClassAdviser']
+      `
+      SELECT * FROM staff_users
+      WHERE email = $1
+      AND role IN ('Principal', 'HOD', 'ClassAdviser')
+      `,
+      [email]
     );
 
     if (result.rows.length === 0) {
@@ -57,106 +71,19 @@ exports.staffLogin = async (req, res) => {
     }
 
     const user = result.rows[0];
-    const match = await bcrypt.compare(password, user.password);
 
+    const match = await bcrypt.compare(password, user.password);
     if (!match) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
     const token = jwt.sign(
-      { id: user.id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '1d' }
-    );
-
-    res.json({
-      token,
-      user: {
+      {
         id: user.id,
-        name: user.name,
-        role: user.role,
-        email: user.email,
-      },
-    });
-  } catch (err) {
-    console.error('STAFF LOGIN ERROR:', err);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
-
-exports.staffLogin = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    const result = await pool.query(
-      `
-      SELECT * FROM staff_users
-      WHERE email = $1
-      AND role IN ('Principal', 'HOD', 'ClassAdviser')
-      `,
-      [email]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
-
-    const user = result.rows[0];
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
-
-    const token = jwt.sign(
-      { id: user.id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '1d' }
-    );
-
-    res.json({
-      token,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
         role: user.role,
         department_id: user.department_id,
         class_id: user.class_id,
       },
-    });
-  } catch (error) {
-    console.error('Staff login error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
-
-exports.staffLogin = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    const result = await pool.query(
-      `
-      SELECT * FROM staff_users
-      WHERE email = $1
-      AND role IN ('Principal', 'HOD', 'ClassAdviser')
-      `,
-      [email]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
-
-    const user = result.rows[0];
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
-
-    const token = jwt.sign(
-      { id: user.id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '1d' }
     );
@@ -173,61 +100,7 @@ exports.staffLogin = async (req, res) => {
       },
     });
   } catch (err) {
-    console.error('Staff login error:', err);
+    console.error('STAFF LOGIN ERROR:', err);
     res.status(500).json({ message: 'Server error' });
   }
 };
-
-const pool = require('../config/db');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-
-exports.staffLogin = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    const result = await pool.query(
-      `
-      SELECT * FROM staff_users
-      WHERE email = $1
-      AND role IN ('Principal', 'HOD', 'ClassAdviser')
-      `,
-      [email]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
-
-    const user = result.rows[0];
-
-    const match = await bcrypt.compare(password, user.password);
-    if (!match) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
-
-    const token = jwt.sign(
-      { id: user.id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '1d' }
-    );
-
-    res.json({
-      token,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        department_id: user.department_id,
-        class_id: user.class_id,
-      },
-    });
-  } catch (error) {
-    console.error('Staff login error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
-
-
-
