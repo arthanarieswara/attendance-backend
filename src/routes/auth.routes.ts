@@ -21,4 +21,17 @@ router.post("/login", async (req, res) => {
   res.json({ token });
 });
 
+router.post("/seed-admin", async (req, res) => {
+  const bcrypt = require("bcryptjs");
+
+  const admin = await User.create({
+    email: "admin@college.com",
+    password: await bcrypt.hash("admin123", 10),
+    role: "ADMIN"
+  });
+
+  res.json(admin);
+});
+
+
 export default router;
